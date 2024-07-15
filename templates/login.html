@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick-theme.css"/>
+
+    <style>
+        body {
+            background-image: url('/static/img/Bible.jpg'); /* Ruta a tu imagen de fondo */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card, .slider-container {
+            width: 45%; /* Ajusta el ancho según tus necesidades */
+            max-width: 500px; /* Máximo ancho */
+            background-color: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Espacio interno */
+            margin: 10px; /* Espacio entre los dos contenedores */
+        }
+
+        .login-card {
+            text-align: center; /* Alinea el contenido al centro */
+            color: white; /* Color de texto blanco */
+        }
+
+        .bi-book-fill {
+            color: white; /* Color de icono blanco */
+            font-size: 3rem; /* Tamaño de fuente grande */
+            margin-bottom: 20px; /* Espacio inferior */
+        }
+
+        .welcome-text {
+            font-size: 24px; /* Tamaño de fuente más grande */
+            margin-bottom: 20px; /* Espacio inferior */
+            font-weight: bold; /* Texto en negrita */
+        }
+
+        .form-group label {
+            font-weight: bold; /* Texto en negrita para etiquetas de formulario */
+            color: white; /* Color de texto blanco */
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.3); /* Fondo semi-transparente para campos de formulario */
+            color: white; /* Color de texto blanco */
+        }
+
+        .btn-primary {
+            background-color: #007bff; /* Color de fondo botón principal */
+            border-color: #007bff; /* Color de borde botón principal */
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3; /* Color de fondo botón principal al pasar el mouse */
+            border-color: #0056b3; /* Color de borde botón principal al pasar el mouse */
+        }
+
+        .slider {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .slick-slide img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <i class="bi bi-book-fill"></i> <!-- Icono grande -->
+            <div class="welcome-text"><b>Bienvenido!</b></div> <!-- Texto de bienvenida en negrita -->
+            <form method="post">
+                <!-- ICONO PERSONA PARA USUARIO LOGIN -->
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-person-fill" viewBox="0 0 16 16">
+                                    <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                </div>
+
+                <!-- ICONO CANDADO PARA CONTRASEÑA LOGIN -->
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-lock-fill" viewBox="0 0 16 16">
+                                    <path d="M7 6a1 1 0 0 1 2 0v1H7zM6 8.3c0-.042.02-.107.105-.175A.64.64 0 0 1 6.5 8h3a.64.64 0 0 1 .395.125c.085.068.105.133.105.175v2.4c0 .042-.02.107-.105.175A.64.64 0 0 1 9.5 11h-3a.64.64 0 0 1-.395-.125C6.02 10.807 6 10.742 6 10.7z"/>
+                                    <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-2 6v1.076c.54.166 1 .597 1 1.224v2.4c0 .816-.781 1.3-1.5 1.3h-3c-.719 0-1.5-.484-1.5-1.3V8.3c0-.627.46-1.058 1-1.224V6a2 2 0 1 1 4 0"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+        <div class="slider-container">
+            <div class="slider">
+                <div><img src="/static/frase1.jpg" alt="Imagen 1"></div>
+                <div><img src="/static/frase2.jpg" alt="Imagen 2"></div>
+                <div><img src="/static/frase3.jpg" alt="Imagen 3"></div>
+                <div><img src="/static/frase4.jpg" alt="Imagen 4"></div>
+                <div><img src="/static/frase5.jpg" alt="Imagen 5"></div>
+                <div><img src="/static/frase6.jpg" alt="Imagen 6"></div>
+                <div><img src="/static/frase7.jpg" alt="Imagen 7"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.slider').slick({
+                dots: true,
+                infinite: true,   /* Repetición infinita */
+                speed: 500,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 3000,
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

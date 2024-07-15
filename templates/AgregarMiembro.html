@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Miembro</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .btn-secondary:focus, .btn-secondary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
+        }
+        .form-control {
+            border-color: #ced4da;
+        }
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+        .btn-primary:focus, .btn-primary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-3">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Miembros
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8">
+            <h1 class="mb-4">Agregar Miembro</h1>
+            
+            <!-- Mostrar mensajes flash aquí -->
+            
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+                    
+            <form method="POST" action="{{ url_for('add_member') }}" onsubmit="return validarFormulario()">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    <div id="nombre-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="colonia">Colonia:</label>
+                    <input type="text" class="form-control" id="colonia" name="colonia" required>
+                    <div id="colonia-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                    <div id="telefono-error" class="error"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Miembro</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function validarFormulario() {
+        return validarNombre() && validarColonia() && validarTelefono();
+    }
+
+    function validarNombre() {
+        const nombre = document.getElementById('nombre').value;
+        const errorDiv = document.getElementById('nombre-error');
+        errorDiv.innerHTML = '';
+        const regexNoEspaciosInicioFin = /^[^\s].*[^\s]$/;
+        const regexNoLetrasIgualesConsecutivas = /(.)\1{2,}/;
+        const regexNoNumeros = /[0-9]/;
+        const regexNoSimbolos = /[!@#$%^&*(),.?":{}|<>]/;
+        const regexSoloLetras = /^[A-Za-z\s]+$/;
+
+        if (nombre.length <= 3) {
+            errorDiv.innerHTML = 'El nombre debe tener más de 3 caracteres.';
+            return false;
+        }
+
+        if (!regexNoEspaciosInicioFin.test(nombre)) {
+            errorDiv.innerHTML = 'El nombre no puede tener espacios al inicio o al final.';
+            return false;
+        }
+
+        if (regexNoLetrasIgualesConsecutivas.test(nombre)) {
+            errorDiv.innerHTML = 'El nombre no puede tener más de dos letras iguales consecutivas.';
+            return false;
+        }
+
+        if (regexNoNumeros.test(nombre)) {
+            errorDiv.innerHTML = 'El nombre no puede contener números.';
+            return false;
+        }
+
+        if (regexNoSimbolos.test(nombre)) {
+            errorDiv.innerHTML = 'El nombre no puede contener símbolos.';
+            return false;
+        }
+
+        if (!regexSoloLetras.test(nombre)) {
+            errorDiv.innerHTML = 'El nombre solo puede contener letras y espacios.';
+            return false;
+        }
+
+        return true;
+    }
+
+    function validarColonia() {
+        const colonia = document.getElementById('colonia').value;
+        const errorDiv = document.getElementById('colonia-error');
+        errorDiv.innerHTML = '';
+        const regexNoEspaciosInicioFin = /^[^\s].*[^\s]$/;
+        const regexNoLetrasIgualesConsecutivas = /(.)\1{3,}/;
+        const regexNoSimbolos = /[!@#$%^&*(),.?":{}|<>]/;
+        
+
+        if (colonia.length <= 2) {
+            errorDiv.innerHTML = 'La colonia debe tener más de 2 caracteres.';
+            return false;
+        }
+
+        if (!regexNoEspaciosInicioFin.test(colonia)) {
+            errorDiv.innerHTML = 'La colonia no puede tener espacios al inicio o al final.';
+            return false;
+        }
+
+        if (regexNoLetrasIgualesConsecutivas.test(colonia)) {
+            errorDiv.innerHTML = 'La colonia no puede tener más de tres letras iguales consecutivas.';
+            return false;
+        }
+
+        if (regexNoSimbolos.test(colonia)) {
+            errorDiv.innerHTML = 'La colonia no puede contener símbolos.';
+            return false;
+        }
+
+        return true;
+    }
+
+    function validarTelefono() {
+        const telefono = document.getElementById('telefono').value;
+        const errorDiv = document.getElementById('telefono-error');
+        errorDiv.innerHTML = '';
+        const regexTelefono = /^\+504\s\d{4}-\d{4}$/;
+
+        if (!regexTelefono.test(telefono)) {
+            errorDiv.innerHTML = 'El teléfono debe seguir el formato: +504 3384-9943.';
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Asistencia</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!--///////////// APARTADO PARA LOS ESTILOS //////////////////////-->
+    <style>
+        body {
+            background-image: url('/static/img/iglesia2.png'); /* Imagen de fondo */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente para el contenido */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            overflow-x: auto; /* Añade barra de desplazamiento horizontal */
+        }
+        .navbar-custom {
+            background-color: #343a40;
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #ffffff;
+        }
+        .active-filter {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .table-container {
+            overflow: auto; /* Añade barras de desplazamiento horizontal y vertical */
+            white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
+        }
+
+        /* Estilo para las casillas de entrada */
+        .form-control.text-center {
+            width: 40px; /* Ajustar el ancho según el diseño deseado */
+            text-align: center; /* Centrar el texto dentro del input */
+            color: #000000; /* Color negro para el texto */
+        }
+
+        /* Estilo para casillas de entrada con asistencia */
+        .form-control.text-center.present {
+            background-color: #17d945; /* Color verde para asistencia */
+        }
+
+        /* Estilo para casillas de entrada sin asistencia */
+        .form-control.text-center.absent {
+            background-color: #ed2f42; /* Color rojo para ausencia */
+        }
+        .gray-row {
+            background-color: #7d7d7d; /* Color gris */
+        
+        }
+
+        
+
+
+    </style>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////////-->
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <a class="navbar-brand" href="#">Mi Iglesia</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('index') }}">Miembros</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('asistencias') }}">Asistencias</a>
+                </li>
+            </ul>
+
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-circle mb-2" viewBox="0 0 16 16" style="color: white;">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+            </svg>
+
+
+
+
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ current_user.username }}
+                    </a>
+                    <!--BOTON CERRAR SESION CON ICONO -->
+                    <div class="dropdown-menu dropdown-menu-right text-center" aria-labelledby="navbarDropdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-circle mb-2" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                        <a class="dropdown-item" href="{{ url_for('logout') }}">Cerrar sesión</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h1 class="mb-4">Gráfico de Asistencia</h1>
+         
+        
+
+        <form id="filtroForm" method="POST">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="mes">Seleccionar Mes:</label>
+                    <select class="form-control" id="mes" name="mes">
+                        {% set meses_espanol = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+                        {% for month in range(1, 13) %}
+                        <option value="{{ month }}" {% if month == selected_month %} selected {% endif %}>{{ meses_espanol[month - 1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="anio">Seleccionar Año:</label>
+                    <select class="form-control" id="anio" name="anio">
+                        {% for year in range(current_year, 2091) %}
+                        <option value="{{ year }}" {% if year == selected_year %} selected {% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+        <div class="table-container">
+            <table id="asistenciasTable" class="table table-bordered mt-4">
+                <thead>
+                    
+                    <tr>
+                        <th class="gray-row">Día</th>
+                        {% for day in days %}
+                        <th class="gray-row">{{ dias_semana[day.weekday()] }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for id, info in asistencias.items() %}
+                    <tr data-id="{{ id }}">
+                        <td>{{ info['nombre'] }}</td>
+                        {% for day in days %}
+                        <td>
+                            {% set day_number = loop.index %}
+                            {% if info['asistencias'][day_number - 1] is defined %}
+                            <input type="text" class="form-control text-center asistencia-input" data-month="{{ selected_month }}" data-year="{{ selected_year }}" data-day="{{ day_number }}" value="{{ info['asistencias'][day_number - 1] }}">
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <h2 id="resumenTitulo">Resumen del Mes de {{ meses_espanol[selected_month - 1] }}</h2>
+        <table id="resumenAsistencias" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="gray-row">Nombre</th>
+                    <th class="gray-row">Faltas</th>
+                    <th class="gray-row">Asistencias</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for id, info in asistencias.items() %}
+                <tr data-id="{{ id }}">
+                    <td>{{ info['nombre'] }}</td>
+                    <td class="faltas"></td>
+                    <td class="asistencias"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Botón para guardar los cambios -->
+        <button id="guardarDatos" class="btn btn-primary mt-3">Guardar Asistencias</button>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Recuperar datos guardados en localStorage si existen
+            let asistenciasData = {};
+    
+            function loadLocalStorage() {
+                const selectedMonth = document.getElementById('mes').value;
+                const selectedYear = document.getElementById('anio').value;
+                const storedData = localStorage.getItem(`asistenciasData_${selectedYear}_${selectedMonth}`);
+                asistenciasData = storedData ? JSON.parse(storedData) : {};
+            }
+    
+            function saveLocalStorage() {
+                const selectedMonth = document.getElementById('mes').value;
+                const selectedYear = document.getElementById('anio').value;
+                localStorage.setItem(`asistenciasData_${selectedYear}_${selectedMonth}`, JSON.stringify(asistenciasData));
+            }
+    
+            loadLocalStorage();
+    
+            // Función para obtener la cantidad de días de un mes y año específicos
+            function getDaysInMonth(month, year) {
+                return new Date(year, month, 0).getDate();
+            }
+    
+            // Función para obtener el nombre del día según el número (0: Domingo, 1: Lunes, ..., 6: Sábado)
+            function getDayName(dayNumber) {
+                const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                return diasSemana[dayNumber];
+            }
+    
+            // Función para actualizar los días de la tabla según el mes y año seleccionados
+            function updateDaysInTable() {
+                const selectedMonth = parseInt(document.getElementById('mes').value);
+                const selectedYear = parseInt(document.getElementById('anio').value);
+                const numDays = getDaysInMonth(selectedMonth, selectedYear);
+                const firstDayOfWeek = new Date(selectedYear, selectedMonth - 1, 1).getDay(); // Primer día de la semana (0: Domingo, 1: Lunes, ..., 6: Sábado)
+    
+                // Actualizar el encabezado de la tabla
+                const tableHeader = document.querySelector('#asistenciasTable thead tr');
+                tableHeader.innerHTML = '<th>Nombre</th>';
+                for (let day = 1; day <= numDays; day++) {
+                    const dayOfWeek = (firstDayOfWeek + day - 1) % 7; // Calcular el nombre del día de la semana
+                    const dayName = getDayName(dayOfWeek);
+                    tableHeader.innerHTML += `<th>${dayName} ${day}</th>`;
+                }
+    
+                // Actualizar las casillas de entrada (inputs) en la tabla
+                const rows = document.querySelectorAll('#asistenciasTable tbody tr');
+                rows.forEach(row => {
+                    const memberId = row.dataset.id;
+                    const memberData = asistenciasData[memberId] || {};
+                    let rowHTML = `<td>${row.querySelector('td').textContent}</td>`;
+                    for (let day = 1; day <= numDays; day++) {
+                        const key = `${selectedYear}-${selectedMonth}-${day}`;
+                        const value = memberData[key] || '';
+                        rowHTML += `<td><input type="text" class="form-control text-center asistencia-input" data-month="${selectedMonth}" data-year="${selectedYear}" data-day="${day}" value="${value}"></td>`;
+                    }
+                    row.innerHTML = rowHTML;
+                });
+    
+                // Aplicar estilos a las casillas según su valor
+                document.querySelectorAll('.asistencia-input').forEach(input => {
+                    applyAttendanceStyle(input);
+                    input.addEventListener('input', function() {
+                        const memberId = input.closest('tr').dataset.id;
+                        const day = parseInt(input.dataset.day);
+                        const month = parseInt(input.dataset.month);
+                        const year = parseInt(input.dataset.year);
+    
+                        // Actualizar datos guardados en localStorage
+                        if (!asistenciasData[memberId]) {
+                            asistenciasData[memberId] = {};
+                        }
+                        const key = `${year}-${month}-${day}`;
+                        asistenciasData[memberId][key] = input.value;
+                        saveLocalStorage();
+    
+                        // Actualizar la tabla de resumen
+                        updateSummary();
+    
+                        // Aplicar el estilo según el valor ingresado
+                        applyAttendanceStyle(input);
+                    });
+                });
+    
+                // Actualizar la tabla de resumen
+                updateSummary();
+                updateSummaryTitle(); // Añadir esta línea para actualizar el título
+            }
+    
+            // Función para aplicar estilo de asistencia
+            function applyAttendanceStyle(input) {
+                if (input.value === '*') {
+                    input.classList.remove('absent');
+                    input.classList.add('present');
+                } else if (input.value === 'F') {
+                    input.classList.remove('present');
+                    input.classList.add('absent');
+                } else {
+                    input.classList.remove('present', 'absent');
+                }
+            }
+    
+            // Función para actualizar el resumen de asistencias y faltas
+            function updateSummary() {
+                const selectedMonth = parseInt(document.getElementById('mes').value);
+                const selectedYear = parseInt(document.getElementById('anio').value);
+                const summaryRows = document.querySelectorAll('#resumenAsistencias tbody tr');
+                summaryRows.forEach(row => {
+                    const memberId = row.dataset.id;
+                    const memberData = asistenciasData[memberId];
+                    if (memberData) {
+                        let faltas = 0;
+                        let asistencias = 0;
+                        Object.keys(memberData).forEach(key => {
+                            const [year, month, day] = key.split('-').map(Number);
+                            if (month === selectedMonth && year === selectedYear) {
+                                if (memberData[key] === 'F') {
+                                    faltas++;
+                                } else if (memberData[key] === '*') {
+                                    asistencias++;
+                                }
+                            }
+                        });
+                        row.querySelector('.faltas').textContent = faltas;
+                        row.querySelector('.asistencias').textContent = asistencias;
+                    } else {
+                        row.querySelector('.faltas').textContent = 0;
+                        row.querySelector('.asistencias').textContent = 0;
+                    }
+                });
+            }
+    
+            // Función para actualizar el título del resumen
+            function updateSummaryTitle() {
+                const selectedMonth = parseInt(document.getElementById('mes').value);
+                const mesesEspanol = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                document.getElementById('resumenTitulo').textContent = `Resumen del Mes de ${mesesEspanol[selectedMonth - 1]}`;
+            }
+    
+            // Llamar a updateSummary y updateDaysInTable al cargar la página
+            updateDaysInTable();
+            updateSummary();
+    
+            // Escuchar cambios en los selects de mes y año
+            document.getElementById('mes').addEventListener('change', function() {
+                loadLocalStorage();
+                updateDaysInTable();
+            });
+    
+            document.getElementById('anio').addEventListener('change', function() {
+                loadLocalStorage();
+                updateDaysInTable();
+            });
+    
+            // Función para guardar los datos en el servidor Flask
+            document.getElementById('guardarDatos').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('mes').value;
+                const selectedYear = document.getElementById('anio').value;
+                const dataToSave = {};
+    
+                // Recorrer las filas de la tabla y recopilar los datos
+                document.querySelectorAll('#asistenciasTable tbody tr').forEach(row => {
+                    const memberId = row.dataset.id;
+                    const memberData = {};
+    
+                    row.querySelectorAll('.asistencia-input').forEach(input => {
+                        const day = input.dataset.day;
+                        const value = input.value;
+                        memberData[`${selectedYear}-${selectedMonth}-${day}`] = value;
+                    });
+    
+                    dataToSave[memberId] = memberData;
+                });
+    
+                // Enviar los datos al servidor Flask
+                fetch('/guardar_asistencias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSave),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Datos guardados correctamente');
+                        localStorage.clear(); // Limpiar localStorage después de guardar en el servidor
+                    } else {
+                        alert('Error al guardar los datos');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar los datos');
+                });
+            });
+    
+            // Función para exportar a Excel
+            document.getElementById('exportarExcel').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('mes').value;
+                const selectedYear = document.getElementById('anio').value;
+                const table = document.getElementById('asistenciasTable');
+                const tableHeader = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
+                const rows = [...table.querySelectorAll('tbody tr')].map(tr => {
+                    const rowData = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
+                    return rowData;
+                });
+    
+                // Crear un objeto con los datos a exportar
+                const exportData = {
+                    monthYear: `${selectedMonth}/${selectedYear}`,
+                    header: tableHeader,
+                    data: rows,
+                };
+    
+                // Enviar los datos al servidor Flask para la exportación
+                fetch('/exportar_excel_asistencias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(exportData),
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `Asistencias_${selectedYear}_${selectedMonth}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al exportar a Excel');
+                });
+            });
+        });
+    </script>
+    
+</body>
+</html>
